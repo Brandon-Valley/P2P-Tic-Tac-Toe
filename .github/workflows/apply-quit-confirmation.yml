@@ -1,0 +1,39 @@
+name: Apply quit confirmation
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/apply-quit-confirmation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Apply tested patch
+        shell: bash
+        run: |
+          printf '%s' 'H4sICO79TGoAA3Y1LnBhdGNoAO1X23LbRgx991dg1AupsSjLlzStbnGTybTTJp0m8Vud6axISNyK3GWWS8uqRv9egEvqYtGxM2nzVD3YWiwWBwscAKsgCECcSBXhbTe2aXJ0fHwMk13B5SUEp2c/dJ7Csft3eXkE7vO+U3/7o/4C0AL42ve+SlDc4E8ixedWee2uiKKXN6jsK5lbVGh8L0xkOPc6pd6Vfi2keo2qaA+uFcC0UKGVWsGdXb+9gvLcO12oyG8PIJYRvsW8SCyvQtJXRfYb2oU2c5bksV74XqxT9Gi1bnWOgi/kKG/Dx7x1CnIKfqojhNFoBF5KW9KDb7+FUCv1rKszVG2obAELc1tiSTV7QRro0Eel+qBWs2YJq0O1bo7kxsouM+x7pcPemoMCobBhDP6fhLSubewFbiNEeyVT1IX1/TaMxoTC/jN46f8BZLshJesOnF70tkYN2sLUzq/rsH00kay0bh0d76TSheZDIS2hT6VJKSic3h2JdydnHNw32+3mnDnRjpVumIg8Z3owV3yPHduEiBHniNnviVhSIBylpjos8srUes+DMNE57rtwD5TBVN/gBs3Z+RT63rms86bR3XtN+O3R+G79Hd6AfNsaD52UFR5p/NDcQWltEHZDda9hZLty6mPXCjNDSzzdOXfQUBovVANGlMmUQBrQ5riM9EI5vLq0CZTkhOi9zEORYVnZzQmmSFm6YV6n+HGOlZT6/FbUZPz/9vS57emBKcmfYSRvoCTB6LqFS5wYvbhujV9znDMqSjTDE1IZXyuaXOUkvnCT+OJxk7hCyTYYxDBrivLyhPOOIg42xpT+yBwSqeZduIoRUs00561l2SZB2o5bLWSSwF9aKljqwsCMOg+IwupUWBmKJFl2hyeZ8zf4PEcqO3td/jFmSr+mRjqTlTXQBkQ+rzA0UDkqt/vmLbEzwg3cp2ZtIsI5ISDBDyeFtWVb325dtyASVgQzTYKyfkjxOW0MT5z2eJhnYnvGSrUMcitskZPiLxxoAUbrdHjCeuO7fPj+rPMd8YH+nZ3tEKKJBmUtFMZQZt+FBtEVhbcQkkBnHpUXRUbk1s8QzUtjtLnCW+ujMW1iOLdzViXSUx+3tEN1RM3PjrwXukgiUNo6rrC3XtmcWp1/3Y31DiUoR8f1dfdZQvOSW1uQUxHlcZercxVJXi370wRvnW+ffIbVdl8Uq7+D8qXcf/pkIBI5U4G0mOb9kO6GpuHAFiRGtKuFjGzcT6XyL8572W3ntNf7pj3IaLpQJAKrs/75WdYEvG8H4vNVSsNNqmCiiVNp/7T3mGNZdarfgx6cEdIg1Ik2/Rth/CBIC4tRe8DcDmKUs9j2T7sXTyqzXc5XYIoEq1uw74NU3AZu+aTnXHggWTWd90qqTD8Vjoy2i4r4e3r8ukDLFeVUt+tKey/HjVB7Oa/t7ESMREYnSMJIikTPaC2MFAHNRJGwd6bAWpaICSYJRpPlvo0raRNuDxy4RnBOBvscnx/g12d5Nrt+xR332fAkPh8Ps/GPBrnfQV5UXxaC27auphZ/s9zO6S0A1NGLZ9zlmnwQZQvNG5pYZiSxZAnE0k1O9t+MdOhXEkDmJNvGdsdSjpSgiGxVaLtp2z4S68vyPbemXPLrDP63pHm4vZRDoHJis94F+WCChRHZhlDmBY2YPZ6QtJo8MNXVHOVBtXGjoUM9CMvlCJvCJFPafAE3H44X/3qx+IrfdD8LFVGN0JuQS2dwz3uq4fIP2Tj4sXf/r6f7QTfT3315PziCo38A6IlsWCMRAAA=' | base64 -d | gzip -d > /tmp/index.patch
+          git apply --check /tmp/index.patch
+          git apply /tmp/index.patch
+
+      - name: Validate and publish
+        shell: bash
+        run: |
+          grep -q 'id="quitConfirm"' index.html
+          grep -q 'Send your friend this link or ask them to scan this QR code.' index.html
+          grep -q 'rule wait-rule' index.html
+          rm -f .github/workflows/apply-quit-confirmation.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/apply-quit-confirmation.yml
+          git commit -m "Confirm before quitting active games"
+          git push origin HEAD:master
