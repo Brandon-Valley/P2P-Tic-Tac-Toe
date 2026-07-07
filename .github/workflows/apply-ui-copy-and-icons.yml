@@ -1,0 +1,120 @@
+name: Apply UI copy and icon updates
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/apply-ui-copy-and-icons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Update index loader
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, found {count}')
+              text = text.replace(old, new, 1)
+
+          replace_once(
+              '        "        <div><h2>Waiting for<br>your other player.</h2></div>\\n"',
+              '        "        <div><h2>Waiting for<br>other player.</h2></div>\\n"',
+              'waiting heading',
+          )
+          replace_once(
+              '        "        <p class=\\"instruction\\">Send them this link. The moment they open it, they will join your room and the game will begin automatically.</p>\\n"',
+              '        "        <p class=\\"instruction\\">Send them this link.</p>\\n"',
+              'waiting instruction',
+          )
+          replace_once(
+              '        "      <div class=\\"backline\\"><button class=\\"menu-back\\" data-go=\\"multi\\" aria-label=\\"Return to multiplayer\\"><span class=\\"menu-arrow\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><path d=\\"M15 6l-6 6 6 6\\"/><path d=\\"M9 12h10\\"/></svg></span><span>Back</span></button><span class=\\"tiny-status\\">Join a room</span></div>\\n"',
+              '        "      <div class=\\"backline\\"><button class=\\"menu-back\\" data-go=\\"multi\\" aria-label=\\"Return to multiplayer\\"><span class=\\"menu-arrow\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><path d=\\"M15 6l-6 6 6 6\\"/><path d=\\"M9 12h10\\"/></svg></span><span>Back</span></button><span class=\\"tiny-status\\">Join multiplayer</span></div>\\n"',
+              'join header',
+          )
+
+          icon_anchor = '''      [
+          '    .game-status{text-align:center;min-height:30px;font-family:Georgia,serif;font-size:1.08rem;font-weight:700;display:flex;align-items:center;justify-content:center}\\n',
+          '    .game-status{text-align:center;min-height:30px;font-family:Georgia,serif;font-size:1.08rem;font-weight:700;display:flex;align-items:center;justify-content:center}\\n    .game-status .turn-owner{font-weight:900}\\n    .game-status .turn-owner.x{color:var(--coral)}\\n    .game-status .turn-owner.o{color:#20a978}\\n'
+        ],
+          '''
+          icon_insert = icon_anchor + '''      [
+          '    .big-choice .arrow{width:42px;height:42px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:1.25rem;background:var(--sun);flex:0 0 auto}\\n    .big-choice.secondary .arrow{background:var(--mint)}\\n',
+          '    .big-choice .choice-icon{width:46px;height:46px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;background:var(--sun);flex:0 0 auto}\\n    .big-choice.secondary .choice-icon{background:var(--mint)}\\n    .big-choice .choice-icon svg{width:25px;height:25px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}\\n'
+        ],
+        [
+          '        <button class="big-choice" data-go="single">\\n          <span><strong>Single player</strong><small>A quick match against the CPU</small></span><span class="arrow">→</span>\\n        </button>\\n',
+          '        <button class="big-choice" data-go="single">\\n          <span><strong>Single player</strong><small>A quick match against the CPU</small></span><span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span>\\n        </button>\\n'
+        ],
+        [
+          '        <button class="big-choice secondary" data-go="multi">\\n          <span><strong>Multiplayer</strong><small>Share a link. Play peer to peer.</small></span><span class="arrow">→</span>\\n        </button>\\n',
+          '        <button class="big-choice secondary" data-go="multi">\\n          <span><strong>Multiplayer</strong><small>Share a link. Play peer to peer.</small></span><span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M14.5 15.5a4.5 4.5 0 0 1 6 4.25"/></svg></span>\\n        </button>\\n'
+        ],
+          '''
+          replace_once(icon_anchor, icon_insert, 'home icons')
+
+          join_anchor = '''      [
+          "      <div class=\\"backline\\"><button class=\\"back\\" id=\\"cancelJoinBtn\\">Cancel</button><span class=\\"tiny-status\\">Connecting</span></div>\\n",
+          '''
+          join_insert = '''      [
+          "      <div class=\\"eyebrow\\">Join multiplayer</div><h2 class=\\"section-title\\">Open the door.</h2>\\n",
+          ""
+        ],
+        [
+          "      <p class=\\"section-copy\\">A shared link opens the game directly. These are the manual ways in.</p>\\n",
+          "      <p class=\\"section-copy\\">Ask your friend to send you the game link.</p>\\n"
+        ],
+        [
+          "          <div class=\\"scan-icon\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><rect x=\\"3\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"14\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"3\\" y=\\"14\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><path d=\\"M14 14h3v3h-3zM18 14h3M21 17v4h-4M14 18v3\\"/></svg></div><div><strong>Scan QR code</strong><small>Use your camera to read the invitation.</small></div><button class=\\"text-button\\" id=\\"scanQrBtn\\">Open camera</button>\\n",
+          "          <div class=\\"scan-icon\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><rect x=\\"3\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"14\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"3\\" y=\\"14\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><path d=\\"M14 14h3v3h-3zM18 14h3M21 17v4h-4M14 18v3\\"/></svg></div><div><strong>Scan QR code</strong></div><button class=\\"text-button\\" id=\\"scanQrBtn\\">Open camera</button>\\n"
+        ],
+          ''' + join_anchor
+          replace_once(join_anchor, join_insert, 'join copy')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Validate loader syntax
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('index.html').read_text(encoding='utf-8')
+          required = [
+              'Waiting for<br>other player.',
+              'Send them this link.</p>',
+              'Join multiplayer</span>',
+              'Ask your friend to send you the game link.',
+              'class="choice-icon"',
+          ]
+          for item in required:
+              if item not in text:
+                  raise SystemExit(f'Missing expected text: {item}')
+          PY
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          rm -f .github/workflows/apply-ui-copy-and-icons.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/apply-ui-copy-and-icons.yml
+          git commit -m "Refine menu icons and multiplayer copy"
+          git push origin HEAD:master
