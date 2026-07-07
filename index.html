@@ -14,199 +14,25 @@
   </style>
 </head>
 <body>
-  <div id="loader" class="loading">Opening Threefold...</div>
+  <div id="status" class="loading">Opening Threefold...</div>
   <script>
-  (() => {
-    const sourceUrl = 'https://raw.githubusercontent.com/Brandon-Valley/P2P-Tic-Tac-Toe/478a4c4a04aa7f743525101ac8af7c2ccce07faa/index.html';
-    const replacements = [
-      [
-        '    #leaveGameBtn,.menu-back{height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:2px solid var(--ink);background:#fffdfa;border-radius:999px;padding:0 12px 0 9px;box-shadow:0 3px 0 rgba(21,21,21,.14);font-size:.7rem;font-weight:950;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}\n',
-        '    #leaveGameBtn,.menu-back{height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:2px solid var(--ink);background:#fffdfa;border-radius:999px;padding:0 12px 0 9px;box-shadow:0 3px 0 rgba(21,21,21,.14);font-size:.7rem;font-weight:950;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}\n    #leaveGameBtn{width:clamp(64px,22vw,92px);min-width:64px;max-width:92px;gap:clamp(3px,1.2vw,7px);padding:0 clamp(7px,2vw,12px) 0 clamp(6px,1.8vw,9px);font-size:clamp(.58rem,2.8vw,.7rem)}\n'
-      ],
-      [
-        '    #leaveGameBtn .menu-arrow,.menu-back .menu-arrow{width:18px;height:18px;display:grid;place-items:center;background:transparent;box-shadow:none;line-height:1}\n',
-        '    #leaveGameBtn .menu-arrow,.menu-back .menu-arrow{width:18px;height:18px;display:grid;place-items:center;background:transparent;box-shadow:none;line-height:1}\n    #leaveGameBtn .menu-arrow{width:clamp(14px,4vw,18px);height:clamp(14px,4vw,18px);flex:0 0 auto}\n'
-      ],
-      [
-        '    #leaveGameBtn .menu-arrow svg,.menu-back .menu-arrow svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}\n',
-        '    #leaveGameBtn .menu-arrow svg,.menu-back .menu-arrow svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}\n    #leaveGameBtn .menu-arrow svg{width:100%;height:100%}\n'
-      ],
-      [
-        '    .game-status{text-align:center;min-height:30px;font-family:Georgia,serif;font-size:1.08rem;font-weight:700;display:flex;align-items:center;justify-content:center}\n',
-        '    .game-status{text-align:center;min-height:30px;font-family:Georgia,serif;font-size:1.08rem;font-weight:700;display:flex;align-items:center;justify-content:center}\n    .game-status .turn-owner{font-weight:900}\n    .game-status .turn-owner.x{color:var(--coral)}\n    .game-status .turn-owner.o{color:#20a978}\n'
-      ],
-      [
-        '    .big-choice .arrow{width:42px;height:42px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:1.25rem;background:var(--sun);flex:0 0 auto}\n    .big-choice.secondary .arrow{background:var(--mint)}\n',
-        '    .big-choice .choice-icon{width:46px;height:46px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;background:var(--sun);flex:0 0 auto}\n    .big-choice.secondary .choice-icon{background:var(--mint)}\n    .big-choice .choice-icon svg{width:25px;height:25px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}\n'
-      ],
-      [
-        '        <button class="big-choice" data-go="single">\n          <span><strong>Single player</strong><small>A quick match against the CPU</small></span><span class="arrow">→</span>\n        </button>\n',
-        '        <button class="big-choice" data-go="single">\n          <span><strong>Single player</strong><small>A quick match against the CPU</small></span><span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span>\n        </button>\n'
-      ],
-      [
-        '        <button class="big-choice secondary" data-go="multi">\n          <span><strong>Multiplayer</strong><small>Share a link. Play peer to peer.</small></span><span class="arrow">→</span>\n        </button>\n',
-        '        <button class="big-choice secondary" data-go="multi">\n          <span><strong>Multiplayer</strong><small>Share a link. Play peer to peer.</small></span><span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M14.5 15.5a4.5 4.5 0 0 1 6 4.25"/></svg></span>\n        </button>\n'
-      ],
-      [
-        '        <span id="gameConnection" hidden aria-hidden="true"></span>\n',
-        ''
-      ],
-      [
-        '      <div class="game-status" id="gameStatus">Your turn.</div>\n',
-        '      <div class="game-status" id="gameStatus"><span class="turn-owner x">Your</span>&nbsp;turn.</div>\n'
-      ],
-      [
-        "    $('#gameConnection').hidden = true;\n",
-        ''
-      ],
-      [
-        "  function updateStatus() {\n    const el = $('#gameStatus');\n    if (winner === 'draw') el.textContent = 'A perfect draw.';\n    else if (winner) el.textContent = winner === localMark() ? 'You found three.' : 'They found three.';\n    else if (mode === 'single') el.textContent = turn === 'X' ? 'Your turn.' : 'The CPU is thinking…';\n    else if (!conn?.open) el.textContent = 'Reconnecting…';\n    else el.textContent = canLocalMove() ? 'Your turn.' : 'Their turn.';\n  }\n",
-        "  function updateStatus() {\n    const el = $('#gameStatus');\n    const setTurnStatus = (owner, mark) => {\n      el.innerHTML = `<span class=\"turn-owner ${mark.toLowerCase()}\">${owner}</span>&nbsp;turn.`;\n    };\n    if (winner === 'draw') el.textContent = 'A perfect draw.';\n    else if (winner) el.textContent = winner === localMark() ? 'You found three.' : 'They found three.';\n    else if (mode === 'single') {\n      if (turn === 'X') setTurnStatus('Your', 'X');\n      else el.textContent = 'The CPU is thinking…';\n    }\n    else if (!conn?.open) el.textContent = 'Reconnecting…';\n    else {\n      const mine = localMark();\n      const localTurn = canLocalMove();\n      const statusMark = localTurn ? mine : (mine === 'X' ? 'O' : 'X');\n      setTurnStatus(localTurn ? 'Your' : 'Their', statusMark);\n    }\n  }\n"
-      ],
-      [
-        "      $('#xName').textContent='You'; $('#oName').textContent='Friend'; $('#gameConnection').hidden=false; $('#gameConnection').innerHTML='<span class=\"connection-dot online\"></span>Peer connected';\n",
-        "      $('#xName').textContent='You'; $('#oName').textContent='Them';\n"
-      ],
-      [
-        "        conn.on('open',()=>{ clearTimeout(timeout); $('#xName').textContent='Friend'; $('#oName').textContent='You'; $('#gameConnection').hidden=false; $('#gameConnection').innerHTML='<span class=\"connection-dot online\"></span>Peer connected'; show('game'); tone(660,.12,'triangle',.04); });\n",
-        "        conn.on('open',()=>{ clearTimeout(timeout); $('#xName').textContent='Them'; $('#oName').textContent='You'; show('game'); tone(660,.12,'triangle',.04); });\n"
-      ],
-      [
-        "    $('#gameConnection').innerHTML='<span class=\"connection-dot\"></span>Disconnected'; updateStatus(); toast('The other player disconnected.');\n",
-        "    updateStatus(); toast('The other player disconnected.');\n"
-      ],
-      [
-        "<div class=\"backline\"><button class=\"menu-back\" data-go=\"home\" aria-label=\"Return to main menu\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Menu</span></button><span class=\"tiny-status\">Peer-to-peer</span></div>\n      <div class=\"eyebrow\">Multiplayer</div><h2 class=\"section-title\">Play a friend.</h2>",
-        "<div class=\"backline\"><button class=\"menu-back\" data-go=\"home\" aria-label=\"Return to main menu\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Menu</span></button><span class=\"tiny-status\">Multiplayer</span></div>\n      <div class=\"eyebrow\">Multiplayer</div>"
-      ],
-      [
-        "    .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n",
-        "    .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n    .result-actions.single{grid-template-columns:1fr}\n"
-      ],
-      [
-        "    .result-sheet h3{font-family:Georgia,serif;font-size:2.4rem;letter-spacing:-.04em;margin:0 0 8px}\n    .result-sheet p{margin:0 0 22px;color:var(--muted)}\n",
-        "    .result-sheet h3{font-family:Georgia,serif;font-size:2.4rem;letter-spacing:-.04em;margin:0 0 22px}\n"
-      ],
-      [
-        "<div class=\"result-splash\" id=\"resultSplash\">\n  <div class=\"result-sheet\"><div class=\"result-mark\" id=\"resultMark\">X</div><h3 id=\"resultTitle\">You won.</h3><p id=\"resultCopy\">A very tidy victory.</p><div class=\"result-actions\"><button class=\"primary mint\" id=\"playAgainBtn\">Play again</button><button class=\"secondary-action\" id=\"resultMenuBtn\">Main menu</button></div></div>\n</div>",
-        "<div class=\"result-splash\" id=\"resultSplash\">\n  <div class=\"result-sheet\"><div class=\"result-mark\" id=\"resultMark\">X</div><h3 id=\"resultTitle\">You won.</h3><div class=\"result-actions\" id=\"resultActions\"><button class=\"primary mint\" id=\"playAgainBtn\">Play again</button><button class=\"secondary-action\" id=\"resultMenuBtn\">Main menu</button></div></div>\n</div>"
-      ],
-      [
-        "  let connectionEpoch = 0;\n",
-        "  let connectionEpoch = 0;\n  let remoteLeaveHandled = false;\n"
-      ],
-      [
-        "  function newState(resetScores = false) {\n    board = Array(9).fill(''); turn = 'X'; winner = null; winLine = []; lastPlaced = -1;\n    if (resetScores) scores = { X:0, O:0 };\n    renderGame();\n  }",
-        "  function newState(resetScores = false) {\n    hideResult();\n    board = Array(9).fill(''); turn = 'X'; winner = null; winLine = []; lastPlaced = -1;\n    if (resetScores) scores = { X:0, O:0 };\n    renderGame();\n  }"
-      ],
-      [
-        "  function showResult() {\n    if (!winner) return;\n    const won = winner === localMark();\n    $('#resultMark').textContent = winner === 'draw' ? '—' : winner;\n    $('#resultMark').style.color = winner === 'X' ? 'var(--coral)' : winner === 'O' ? '#20a978' : 'var(--ink)';\n    $('#resultTitle').textContent = winner === 'draw' ? 'A draw.' : won ? 'You won.' : mode === 'single' ? 'CPU wins.' : 'They won.';\n    $('#resultCopy').textContent = winner === 'draw' ? 'Nobody blinked. Nobody budged.' : won ? 'Three in a row, clean and simple.' : 'The board got away from you this time.';\n    $('#resultSplash').classList.add('show');\n    if (won) { winSound(); confetti(); } else tone(180,.25,'sawtooth',.025);\n  }\n\n  function hideResult(){ $('#resultSplash').classList.remove('show'); }",
-        "  function resetResultActions() {\n    $('#playAgainBtn').hidden = false;\n    $('#resultMenuBtn').textContent = 'Main menu';\n    $('#resultActions').classList.remove('single');\n  }\n\n  function showResult() {\n    if (!winner) return;\n    resetResultActions();\n    const won = winner === localMark();\n    $('#resultMark').textContent = winner === 'draw' ? '—' : winner;\n    $('#resultMark').style.color = winner === 'X' ? 'var(--coral)' : winner === 'O' ? '#20a978' : 'var(--ink)';\n    $('#resultTitle').textContent = winner === 'draw' ? 'A draw.' : won ? 'You won.' : mode === 'single' ? 'CPU wins.' : 'They won.';\n    $('#resultSplash').classList.add('show');\n    if (won) { winSound(); confetti(); } else tone(180,.25,'sawtooth',.025);\n  }\n\n  function hideResult(){ $('#resultSplash').classList.remove('show'); resetResultActions(); }\n\n  function showPeerLeft() {\n    if (currentScreen !== 'game' || mode !== 'multi' || remoteLeaveHandled) return;\n    remoteLeaveHandled = true;\n    cleanupNetwork();\n    $('#resultMark').textContent = '—';\n    $('#resultMark').style.color = 'var(--ink)';\n    $('#resultTitle').textContent = 'They left the game.';\n    $('#playAgainBtn').hidden = true;\n    $('#resultMenuBtn').textContent = 'Main menu';\n    $('#resultActions').classList.add('single');\n    $('#resultSplash').classList.add('show');\n    renderGame();\n  }"
-      ],
-      [
-        "    clickSound(); cleanupNetwork(); mode='multi'; isHost=true; scores={X:0,O:0}; roomReady=false; show('waiting');",
-        "    clickSound(); cleanupNetwork(); mode='multi'; isHost=true; remoteLeaveHandled=false; scores={X:0,O:0}; roomReady=false; show('waiting');"
-      ],
-      [
-        "      roomReady=true; closeNearbyBeacon(); mode='multi'; isHost=true; scores={X:0,O:0}; newState();",
-        "      roomReady=true; closeNearbyBeacon(); mode='multi'; isHost=true; remoteLeaveHandled=false; scores={X:0,O:0}; newState();"
-      ],
-      [
-        "    cleanupNetwork(); mode='multi'; isHost=false; hostPeerId=id; scores={X:0,O:0}; board=Array(9).fill(''); turn='X'; winner=null; winLine=[]; lastPlaced=-1; renderGame(); show('connecting');",
-        "    cleanupNetwork(); mode='multi'; isHost=false; remoteLeaveHandled=false; hostPeerId=id; scores={X:0,O:0}; board=Array(9).fill(''); turn='X'; winner=null; winLine=[]; lastPlaced=-1; renderGame(); show('connecting');"
-      ],
-      [
-        "    conn.on('data', message => {\n      if (!message || typeof message !== 'object') return;\n      if (isHost) {\n        if (message.type==='move-request') hostApplyMove(Number(message.index),'O');\n        else if (message.type==='restart-request') { newState(!!message.resetScores); broadcastState(); }\n        else if (message.type==='state-request') broadcastState();\n      } else if (message.type==='state') applyRemoteState(message.state);\n    });",
-        "    conn.on('data', message => {\n      if (!message || typeof message !== 'object') return;\n      if (message.type === 'leave') { showPeerLeft(); return; }\n      if (isHost) {\n        if (message.type==='move-request') hostApplyMove(Number(message.index),'O');\n        else if (message.type==='restart-request') { newState(!!message.resetScores); broadcastState(); }\n        else if (message.type==='state-request') broadcastState();\n      } else if (message.type==='state') applyRemoteState(message.state);\n    });"
-      ],
-      [
-        "    renderGame(); if (!priorWinner && winner) setTimeout(showResult,480);",
-        "    renderGame();\n    if (priorWinner && !winner) hideResult();\n    else if (!priorWinner && winner) setTimeout(showResult,480);"
-      ],
-      [
-        "  function handleDisconnect(){\n    if(currentScreen!=='game')return;\n    updateStatus(); toast('The other player disconnected.');\n  }",
-        "  function handleDisconnect(){\n    if(currentScreen!=='game' || mode!=='multi' || remoteLeaveHandled)return;\n    showPeerLeft();\n  }"
-      ],
-      [
-        "  $('#leaveGameBtn').addEventListener('click',leaveToMainMenu);\n  function leaveToMainMenu(){ clickSound(); hideResult(); cleanupNetwork(); show('home'); }",
-        "  $('#leaveGameBtn').addEventListener('click',leaveToMainMenu);\n  function leaveToMainMenu(){\n    clickSound(); hideResult();\n    if (mode === 'multi' && conn?.open) {\n      const leavingConnection = conn;\n      try { leavingConnection.send({type:'leave'}); } catch (_) {}\n      show('home');\n      setTimeout(() => { if (conn === leavingConnection) cleanupNetwork(); }, 140);\n      return;\n    }\n    cleanupNetwork(); show('home');\n  }"
-      ],
-      [
-        "      <div class=\"eyebrow\">Multiplayer</div>\n",
-        ""
-      ],
-      [
-        "      <div class=\"backline\"><button class=\"back\" id=\"cancelHostBtn\">Cancel</button><span class=\"tiny-status\"><span class=\"connection-dot\" id=\"waitDot\"></span><span id=\"waitNet\">Starting room</span></span></div>\n",
-        "      <div class=\"backline\"><button class=\"menu-back\" id=\"cancelHostBtn\" aria-label=\"Cancel and return to multiplayer\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Cancel</span></button><span class=\"spinner small\" aria-label=\"Preparing room\"></span></div>\n"
-      ],
-      [
-        "        <div class=\"spinner\" aria-hidden=\"true\"></div>\n",
-        ""
-      ],
-      [
-        "        <div><div class=\"eyebrow\">Game created</div><h2>Waiting for<br>your other player.</h2></div>\n",
-        "        <div><h2>Waiting for<br>other player.</h2></div>\n"
-      ],
-      [
-        "        <p class=\"instruction\">Send them this link. The moment they open it, they will join your game automatically.</p>\n",
-        "        <p class=\"instruction\">Send them this link.</p>\n"
-      ],
-      [
-        "      <div class=\"backline\"><button class=\"back\" data-go=\"multi\">Back</button><span class=\"tiny-status\">Join a room</span></div>\n",
-        "      <div class=\"backline\"><button class=\"menu-back\" data-go=\"multi\" aria-label=\"Return to multiplayer\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Back</span></button><span class=\"tiny-status\">Join multiplayer</span></div>\n"
-      ],
-      [
-        "      <div class=\"eyebrow\">Join multiplayer</div><h2 class=\"section-title\">Open the door.</h2>\n",
-        ""
-      ],
-      [
-        "      <p class=\"section-copy\">A shared link opens the game directly. These are the manual ways in.</p>\n",
-        "      <p class=\"section-copy\">Ask your friend to send you the game link.</p>\n"
-      ],
-      [
-        "          <div class=\"scan-icon\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM18 14h3M21 17v4h-4M14 18v3\"/></svg></div><div><strong>Scan QR code</strong><small>Use your camera to read the invitation.</small></div><button class=\"text-button\" id=\"scanQrBtn\">Open camera</button>\n",
-        "          <div class=\"scan-icon\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM18 14h3M21 17v4h-4M14 18v3\"/></svg></div><div><strong>Scan QR code</strong></div><button class=\"text-button\" id=\"scanQrBtn\">Open camera</button>\n"
-      ],
-      [
-        "      <div class=\"backline\"><button class=\"back\" id=\"cancelJoinBtn\">Cancel</button><span class=\"tiny-status\">Connecting</span></div>\n",
-        "      <div class=\"backline\"><button class=\"menu-back\" id=\"cancelJoinBtn\" aria-label=\"Cancel and return to multiplayer\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Cancel</span></button><span class=\"tiny-status\">Connecting</span></div>\n"
-      ],
-      [
-        "    $('#shareLink').textContent='Preparing your link…'; $('#waitNet').textContent='Starting room'; $('#waitDot').classList.remove('online'); $('#qrCode').innerHTML='';\n",
-        "    $('#shareLink').textContent='Preparing your link…'; $('#qrCode').innerHTML='';\n"
-      ],
-      [
-        "        $('#shareLink').textContent=shareUrl; $('#waitNet').textContent='Room is open'; $('#waitDot').classList.add('online');\n",
-        "        $('#shareLink').textContent=shareUrl;\n"
-      ],
-      [
-        "        if (currentScreen === 'waiting') { toast(peerErrorText(err)); $('#waitNet').textContent='Could not open room'; }\n",
-        "        if (currentScreen === 'waiting') { toast(peerErrorText(err)); }\n"
-      ]
-    ];
-
-    const showError = message => {
-      document.body.innerHTML = `<div class="error"><h1>Could not open Threefold</h1><p>${message}</p><button type="button" onclick="location.reload()">Try again</button></div>`;
-    };
-
-    fetch(sourceUrl, {cache: 'force-cache'})
-      .then(response => {
-        if (!response.ok) throw new Error(`Source request failed with ${response.status}`);
+  (async () => {
+    try {
+      const files = Array.from({length: 8}, (_, i) => `runtime/quit-confirm-v5-${String(i + 1).padStart(2, '0')}.txt?v=5`);
+      const parts = await Promise.all(files.map(async file => {
+        const response = await fetch(file, {cache: 'no-store'});
+        if (!response.ok) throw new Error(`Could not load ${file}`);
         return response.text();
-      })
-      .then(html => {
-        for (const [before, after] of replacements) {
-          const first = html.indexOf(before);
-          if (first < 0 || html.indexOf(before, first + before.length) >= 0) {
-            throw new Error('The game source did not match the expected version.');
-          }
-          html = html.replace(before, after);
-        }
-        document.open();
-        document.write(html);
-        document.close();
-      })
-      .catch(error => showError(error.message || 'The game could not be loaded.'));
+      }));
+      const binary = atob(parts.join(''));
+      const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+      const html = new TextDecoder().decode(bytes);
+      document.open();
+      document.write(html);
+      document.close();
+    } catch (error) {
+      document.body.innerHTML = `<div class="error"><h1>Could not open Threefold</h1><p>${error.message || 'The game could not be loaded.'}</p><button type="button" onclick="location.reload()">Try again</button></div>`;
+    }
   })();
   </script>
 </body>
