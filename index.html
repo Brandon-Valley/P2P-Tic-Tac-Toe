@@ -118,6 +118,46 @@
       [
         "  $('#leaveGameBtn').addEventListener('click',leaveToMainMenu);\n  function leaveToMainMenu(){ clickSound(); hideResult(); cleanupNetwork(); show('home'); }",
         "  $('#leaveGameBtn').addEventListener('click',leaveToMainMenu);\n  function leaveToMainMenu(){\n    clickSound(); hideResult();\n    if (mode === 'multi' && conn?.open) {\n      const leavingConnection = conn;\n      try { leavingConnection.send({type:'leave'}); } catch (_) {}\n      show('home');\n      setTimeout(() => { if (conn === leavingConnection) cleanupNetwork(); }, 140);\n      return;\n    }\n    cleanupNetwork(); show('home');\n  }"
+      ],
+      [
+        "      <div class=\"eyebrow\">Multiplayer</div>\n",
+        ""
+      ],
+      [
+        "      <div class=\"backline\"><button class=\"back\" id=\"cancelHostBtn\">Cancel</button><span class=\"tiny-status\"><span class=\"connection-dot\" id=\"waitDot\"></span><span id=\"waitNet\">Starting room</span></span></div>\n",
+        "      <div class=\"backline\"><button class=\"menu-back\" id=\"cancelHostBtn\" aria-label=\"Cancel and return to multiplayer\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Cancel</span></button><span class=\"spinner small\" aria-label=\"Preparing room\"></span></div>\n"
+      ],
+      [
+        "        <div class=\"spinner\" aria-hidden=\"true\"></div>\n",
+        ""
+      ],
+      [
+        "        <div><div class=\"eyebrow\">Game created</div><h2>Waiting for<br>your other player.</h2></div>\n",
+        "        <div><h2>Waiting for<br>your other player.</h2></div>\n"
+      ],
+      [
+        "        <p class=\"instruction\">Send them this link. The moment they open it, they will join your game automatically.</p>\n",
+        "        <p class=\"instruction\">Send them this link. The moment they open it, they will join your room and the game will begin automatically.</p>\n"
+      ],
+      [
+        "      <div class=\"backline\"><button class=\"back\" data-go=\"multi\">Back</button><span class=\"tiny-status\">Join a room</span></div>\n",
+        "      <div class=\"backline\"><button class=\"menu-back\" data-go=\"multi\" aria-label=\"Return to multiplayer\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Back</span></button><span class=\"tiny-status\">Join a room</span></div>\n"
+      ],
+      [
+        "      <div class=\"backline\"><button class=\"back\" id=\"cancelJoinBtn\">Cancel</button><span class=\"tiny-status\">Connecting</span></div>\n",
+        "      <div class=\"backline\"><button class=\"menu-back\" id=\"cancelJoinBtn\" aria-label=\"Cancel and return to multiplayer\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Cancel</span></button><span class=\"tiny-status\">Connecting</span></div>\n"
+      ],
+      [
+        "    $('#shareLink').textContent='Preparing your link…'; $('#waitNet').textContent='Starting room'; $('#waitDot').classList.remove('online'); $('#qrCode').innerHTML='';\n",
+        "    $('#shareLink').textContent='Preparing your link…'; $('#qrCode').innerHTML='';\n"
+      ],
+      [
+        "        $('#shareLink').textContent=shareUrl; $('#waitNet').textContent='Room is open'; $('#waitDot').classList.add('online');\n",
+        "        $('#shareLink').textContent=shareUrl;\n"
+      ],
+      [
+        "        if (currentScreen === 'waiting') { toast(peerErrorText(err)); $('#waitNet').textContent='Could not open room'; }\n",
+        "        if (currentScreen === 'waiting') { toast(peerErrorText(err)); }\n"
       ]
     ];
 
