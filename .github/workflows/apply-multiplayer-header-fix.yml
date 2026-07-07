@@ -119,3 +119,5 @@ jobs:
           git add index.html
           git commit -m "Fix multiplayer header layout"
           git push origin HEAD:master
+
+# Triggered after the workflow already existed on master.
