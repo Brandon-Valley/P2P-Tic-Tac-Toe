@@ -37,3 +37,5 @@ jobs:
           git add index.html .github/workflows/apply-quit-confirmation.yml
           git commit -m "Confirm before quitting active games"
           git push origin HEAD:master
+
+# Trigger after workflow registration.
