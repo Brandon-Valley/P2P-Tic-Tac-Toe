@@ -62,6 +62,62 @@
       [
         "    $('#gameConnection').innerHTML='<span class=\"connection-dot\"></span>Disconnected'; updateStatus(); toast('The other player disconnected.');\n",
         "    updateStatus(); toast('The other player disconnected.');\n"
+      ],
+      [
+        "<div class=\"backline\"><button class=\"menu-back\" data-go=\"home\" aria-label=\"Return to main menu\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Menu</span></button><span class=\"tiny-status\">Peer-to-peer</span></div>\n      <div class=\"eyebrow\">Multiplayer</div><h2 class=\"section-title\">Play a friend.</h2>",
+        "<div class=\"backline\"><button class=\"menu-back\" data-go=\"home\" aria-label=\"Return to main menu\"><span class=\"menu-arrow\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"/><path d=\"M9 12h10\"/></svg></span><span>Menu</span></button><span class=\"tiny-status\">Multiplayer</span></div>\n      <div class=\"eyebrow\">Multiplayer</div>"
+      ],
+      [
+        "    .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n",
+        "    .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n    .result-actions.single{grid-template-columns:1fr}\n"
+      ],
+      [
+        "    .result-sheet h3{font-family:Georgia,serif;font-size:2.4rem;letter-spacing:-.04em;margin:0 0 8px}\n    .result-sheet p{margin:0 0 22px;color:var(--muted)}\n",
+        "    .result-sheet h3{font-family:Georgia,serif;font-size:2.4rem;letter-spacing:-.04em;margin:0 0 22px}\n"
+      ],
+      [
+        "<div class=\"result-splash\" id=\"resultSplash\">\n  <div class=\"result-sheet\"><div class=\"result-mark\" id=\"resultMark\">X</div><h3 id=\"resultTitle\">You won.</h3><p id=\"resultCopy\">A very tidy victory.</p><div class=\"result-actions\"><button class=\"primary mint\" id=\"playAgainBtn\">Play again</button><button class=\"secondary-action\" id=\"resultMenuBtn\">Main menu</button></div></div>\n</div>",
+        "<div class=\"result-splash\" id=\"resultSplash\">\n  <div class=\"result-sheet\"><div class=\"result-mark\" id=\"resultMark\">X</div><h3 id=\"resultTitle\">You won.</h3><div class=\"result-actions\" id=\"resultActions\"><button class=\"primary mint\" id=\"playAgainBtn\">Play again</button><button class=\"secondary-action\" id=\"resultMenuBtn\">Main menu</button></div></div>\n</div>"
+      ],
+      [
+        "  let connectionEpoch = 0;\n",
+        "  let connectionEpoch = 0;\n  let remoteLeaveHandled = false;\n"
+      ],
+      [
+        "  function newState(resetScores = false) {\n    board = Array(9).fill(''); turn = 'X'; winner = null; winLine = []; lastPlaced = -1;\n    if (resetScores) scores = { X:0, O:0 };\n    renderGame();\n  }",
+        "  function newState(resetScores = false) {\n    hideResult();\n    board = Array(9).fill(''); turn = 'X'; winner = null; winLine = []; lastPlaced = -1;\n    if (resetScores) scores = { X:0, O:0 };\n    renderGame();\n  }"
+      ],
+      [
+        "  function showResult() {\n    if (!winner) return;\n    const won = winner === localMark();\n    $('#resultMark').textContent = winner === 'draw' ? '—' : winner;\n    $('#resultMark').style.color = winner === 'X' ? 'var(--coral)' : winner === 'O' ? '#20a978' : 'var(--ink)';\n    $('#resultTitle').textContent = winner === 'draw' ? 'A draw.' : won ? 'You won.' : mode === 'single' ? 'CPU wins.' : 'They won.';\n    $('#resultCopy').textContent = winner === 'draw' ? 'Nobody blinked. Nobody budged.' : won ? 'Three in a row, clean and simple.' : 'The board got away from you this time.';\n    $('#resultSplash').classList.add('show');\n    if (won) { winSound(); confetti(); } else tone(180,.25,'sawtooth',.025);\n  }\n\n  function hideResult(){ $('#resultSplash').classList.remove('show'); }",
+        "  function resetResultActions() {\n    $('#playAgainBtn').hidden = false;\n    $('#resultMenuBtn').textContent = 'Main menu';\n    $('#resultActions').classList.remove('single');\n  }\n\n  function showResult() {\n    if (!winner) return;\n    resetResultActions();\n    const won = winner === localMark();\n    $('#resultMark').textContent = winner === 'draw' ? '—' : winner;\n    $('#resultMark').style.color = winner === 'X' ? 'var(--coral)' : winner === 'O' ? '#20a978' : 'var(--ink)';\n    $('#resultTitle').textContent = winner === 'draw' ? 'A draw.' : won ? 'You won.' : mode === 'single' ? 'CPU wins.' : 'They won.';\n    $('#resultSplash').classList.add('show');\n    if (won) { winSound(); confetti(); } else tone(180,.25,'sawtooth',.025);\n  }\n\n  function hideResult(){ $('#resultSplash').classList.remove('show'); resetResultActions(); }\n\n  function showPeerLeft() {\n    if (currentScreen !== 'game' || mode !== 'multi' || remoteLeaveHandled) return;\n    remoteLeaveHandled = true;\n    cleanupNetwork();\n    $('#resultMark').textContent = '—';\n    $('#resultMark').style.color = 'var(--ink)';\n    $('#resultTitle').textContent = 'They left the game.';\n    $('#playAgainBtn').hidden = true;\n    $('#resultMenuBtn').textContent = 'Main menu';\n    $('#resultActions').classList.add('single');\n    $('#resultSplash').classList.add('show');\n    renderGame();\n  }"
+      ],
+      [
+        "    clickSound(); cleanupNetwork(); mode='multi'; isHost=true; scores={X:0,O:0}; roomReady=false; show('waiting');",
+        "    clickSound(); cleanupNetwork(); mode='multi'; isHost=true; remoteLeaveHandled=false; scores={X:0,O:0}; roomReady=false; show('waiting');"
+      ],
+      [
+        "      roomReady=true; closeNearbyBeacon(); mode='multi'; isHost=true; scores={X:0,O:0}; newState();",
+        "      roomReady=true; closeNearbyBeacon(); mode='multi'; isHost=true; remoteLeaveHandled=false; scores={X:0,O:0}; newState();"
+      ],
+      [
+        "    cleanupNetwork(); mode='multi'; isHost=false; hostPeerId=id; scores={X:0,O:0}; board=Array(9).fill(''); turn='X'; winner=null; winLine=[]; lastPlaced=-1; renderGame(); show('connecting');",
+        "    cleanupNetwork(); mode='multi'; isHost=false; remoteLeaveHandled=false; hostPeerId=id; scores={X:0,O:0}; board=Array(9).fill(''); turn='X'; winner=null; winLine=[]; lastPlaced=-1; renderGame(); show('connecting');"
+      ],
+      [
+        "    conn.on('data', message => {\n      if (!message || typeof message !== 'object') return;\n      if (isHost) {\n        if (message.type==='move-request') hostApplyMove(Number(message.index),'O');\n        else if (message.type==='restart-request') { newState(!!message.resetScores); broadcastState(); }\n        else if (message.type==='state-request') broadcastState();\n      } else if (message.type==='state') applyRemoteState(message.state);\n    });",
+        "    conn.on('data', message => {\n      if (!message || typeof message !== 'object') return;\n      if (message.type === 'leave') { showPeerLeft(); return; }\n      if (isHost) {\n        if (message.type==='move-request') hostApplyMove(Number(message.index),'O');\n        else if (message.type==='restart-request') { newState(!!message.resetScores); broadcastState(); }\n        else if (message.type==='state-request') broadcastState();\n      } else if (message.type==='state') applyRemoteState(message.state);\n    });"
+      ],
+      [
+        "    renderGame(); if (!priorWinner && winner) setTimeout(showResult,480);",
+        "    renderGame();\n    if (priorWinner && !winner) hideResult();\n    else if (!priorWinner && winner) setTimeout(showResult,480);"
+      ],
+      [
+        "  function handleDisconnect(){\n    if(currentScreen!=='game')return;\n    updateStatus(); toast('The other player disconnected.');\n  }",
+        "  function handleDisconnect(){\n    if(currentScreen!=='game' || mode!=='multi' || remoteLeaveHandled)return;\n    showPeerLeft();\n  }"
+      ],
+      [
+        "  $('#leaveGameBtn').addEventListener('click',leaveToMainMenu);\n  function leaveToMainMenu(){ clickSound(); hideResult(); cleanupNetwork(); show('home'); }",
+        "  $('#leaveGameBtn').addEventListener('click',leaveToMainMenu);\n  function leaveToMainMenu(){\n    clickSound(); hideResult();\n    if (mode === 'multi' && conn?.open) {\n      const leavingConnection = conn;\n      try { leavingConnection.send({type:'leave'}); } catch (_) {}\n      show('home');\n      setTimeout(() => { if (conn === leavingConnection) cleanupNetwork(); }, 140);\n      return;\n    }\n    cleanupNetwork(); show('home');\n  }"
       ]
     ];
 
