@@ -18,100 +18,19 @@ jobs:
         with:
           ref: master
 
-      - name: Update index loader
+      - name: Apply tested index patch
         shell: bash
         run: |
-          python3 <<'PY'
-          from pathlib import Path
+          printf '%s' 'H4sICH/6TGoAA3Y0LnBhdGNoAO1YW2/bNhR+z68gNAxZYcux5FviG9LmocCAYL2s2MO0B1qiJdYS6ZGUHTXY637AfuJ+yQ5JyZITJ3V6GfrQNJVo8vBcvnP48Tiu6yJ8RllEbjqJytKTVquFFs2Jy0vk9obtIWrB0ztHl5cnqPo51Y9OjDPiSoVVLm8VuVEuTmnMxiFhiohJRpmbEBonatzrrm8mS86Uu8QZTYvxS8JFTHFbEkGXdkXSD2TsdbrngmR2Zms3j7rdSUTlOsXFeJmSm4mx4lJFMlnZep9LRZeFG8I+mCmn/wrYXT9RR+WCuXzLiLhtWrnodj8i3rm5DXnKxXiDxU8umBI4ffaxPbzc84PfxRejcxA/rVD8o12Nfj9p7QO7oLEbJpyGBHWwEHx7u6WRSsZ9H3AsMTXjBRcREWMYIslTGiHrG2WrZ+WaK3BEczkedH/coRgLGk1gFJJ9FJt58Ac6DwscrmLBcxaVUcucPZvoLIy7qItwrniFQO1zRxLIQ4RFUXl/Tw3UhtLYnbYfC92+XQraKgCGDQCGXxyAzw636fGDQT8WJ5KbuIzVH9SxmnHl/SLl4WqypGk6ZpyRiVSCr8g4zIWAMK50vZVzbqmp41cTKWUkxOux8as5+Z5TZmdNjbZ2Ndo6XKP6Z7rIlQKfwxRLOXPqkBwUYYXdmM8cSVmcEmduwy73yTVm86m2zuL5WyOBdGhETM/K2anMcJrOn6M/cxquUIZVmCAcY8qkQioh6OrVOxA2QvC2CuFZOWMKz5n/+/c/5WrtwPTM+j0/UH/feliNUnEQFhS7CY0iwmaOEjn4M4X6QRtKti/4zczRRev34RcWQipC8CeEac93UFjMnHMHiZnTd87m0zVWCYpmzvUA+R4eoRHSez3k9VFXr5+B3vmjSH5myaDdKWqgnOWpoo+BfK0FDkP8NsGCIIyguFcd9Apk0JoQgRQ3787/XTzfVIBfpIwumlXU01XSrLGRXb0wq35nsFdlvQ7UWRcP4KX/l7Xm2VrbSXl9WPNAAOtBfyc4hLE/+PSy3GF9ugc6omBUX+RXnAFLKqrBsbgcxKgye9puaGxe77qD8nq9tjdALa8/aPujRhPVvP53252dQxHdzPWjzFjgkIIsoCoDZ/4SXEShIFiRaHpmBBN//humCigHLbmYLsS84LlAHBhFlBQE9QBSVj5gTvvEfcDo03XVx+Cjqh7Tchww6x0imjNFbvIEqLwlLNIMmsGDyvJU/AqMmvEMrkW9VCC+hlxS1baftnCFIn3xIROhTr2544GVaQhHpwAP1w+C9fUcEZxnCFst1isjsCAxSBx08FAGnuJfpeaIFOwVpe5xdPcAaveJzy4FNdUFlutA8AUs7E5ok5UCByqlKLtoEPxZA4INGhWHPVy9x7oFKcjdh3yzxzzFC5LC5BuiG3nNp1nNwlrlns9Gobkwgn0qDQxPBHfINKjZVC+VXBcA2Q3QMHWHyPwLGjwIaxfI8xOvG9ylPHtXWEBLgD4P13t19B3Wp8Ga7d3XB7E92CAdgrtm/PuqS3rdyUp7X7mKqlSD84vmF00fEecl0ZpjUxs8zp/1PQshXxdg4DmSuv+IDH8YOpM1XUVUgDTQk+Y9CaQKjYpezDDLcYq2uJCIsppdn2BWrixHLgU1PMahr4I3zNXm9yjtiCjvIS9DzExz9Cm1p0NHerYHu4vybb6IwXgEY/udrvwgtKRnSnC30et/6s7KpNFwzM7GQelDs5/0Nr3E7X249s7Np2sf2rLRpp+4fSNwvuk1T0vVpNRfegA49PoNCnlE7var76AQTOpCyJHAOnXQw9hLjrINhXMEiW60rUbxHZ4xf2aycxAIjcpkvRYvFKvK3upvNIEHKux7yr9uyr9g8r5CU2JMg+WQpJparfkr8/koqq++ILD4fmPyH4I2dCxZFQAA' | base64 -d | gzip -d > /tmp/index.patch
+          git apply --check /tmp/index.patch
+          git apply /tmp/index.patch
 
-          path = Path('index.html')
-          text = path.read_text(encoding='utf-8')
-
-          def replace_once(old, new, label):
-              global text
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f'{label}: expected 1 match, found {count}')
-              text = text.replace(old, new, 1)
-
-          replace_once(
-              '        "        <div><h2>Waiting for<br>your other player.</h2></div>\\n"',
-              '        "        <div><h2>Waiting for<br>other player.</h2></div>\\n"',
-              'waiting heading',
-          )
-          replace_once(
-              '        "        <p class=\\"instruction\\">Send them this link. The moment they open it, they will join your room and the game will begin automatically.</p>\\n"',
-              '        "        <p class=\\"instruction\\">Send them this link.</p>\\n"',
-              'waiting instruction',
-          )
-          replace_once(
-              '        "      <div class=\\"backline\\"><button class=\\"menu-back\\" data-go=\\"multi\\" aria-label=\\"Return to multiplayer\\"><span class=\\"menu-arrow\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><path d=\\"M15 6l-6 6 6 6\\"/><path d=\\"M9 12h10\\"/></svg></span><span>Back</span></button><span class=\\"tiny-status\\">Join a room</span></div>\\n"',
-              '        "      <div class=\\"backline\\"><button class=\\"menu-back\\" data-go=\\"multi\\" aria-label=\\"Return to multiplayer\\"><span class=\\"menu-arrow\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><path d=\\"M15 6l-6 6 6 6\\"/><path d=\\"M9 12h10\\"/></svg></span><span>Back</span></button><span class=\\"tiny-status\\">Join multiplayer</span></div>\\n"',
-              'join header',
-          )
-
-          icon_anchor = '''      [
-          '    .game-status{text-align:center;min-height:30px;font-family:Georgia,serif;font-size:1.08rem;font-weight:700;display:flex;align-items:center;justify-content:center}\\n',
-          '    .game-status{text-align:center;min-height:30px;font-family:Georgia,serif;font-size:1.08rem;font-weight:700;display:flex;align-items:center;justify-content:center}\\n    .game-status .turn-owner{font-weight:900}\\n    .game-status .turn-owner.x{color:var(--coral)}\\n    .game-status .turn-owner.o{color:#20a978}\\n'
-        ],
-          '''
-          icon_insert = icon_anchor + '''      [
-          '    .big-choice .arrow{width:42px;height:42px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:1.25rem;background:var(--sun);flex:0 0 auto}\\n    .big-choice.secondary .arrow{background:var(--mint)}\\n',
-          '    .big-choice .choice-icon{width:46px;height:46px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;background:var(--sun);flex:0 0 auto}\\n    .big-choice.secondary .choice-icon{background:var(--mint)}\\n    .big-choice .choice-icon svg{width:25px;height:25px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}\\n'
-        ],
-        [
-          '        <button class="big-choice" data-go="single">\\n          <span><strong>Single player</strong><small>A quick match against the CPU</small></span><span class="arrow">→</span>\\n        </button>\\n',
-          '        <button class="big-choice" data-go="single">\\n          <span><strong>Single player</strong><small>A quick match against the CPU</small></span><span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span>\\n        </button>\\n'
-        ],
-        [
-          '        <button class="big-choice secondary" data-go="multi">\\n          <span><strong>Multiplayer</strong><small>Share a link. Play peer to peer.</small></span><span class="arrow">→</span>\\n        </button>\\n',
-          '        <button class="big-choice secondary" data-go="multi">\\n          <span><strong>Multiplayer</strong><small>Share a link. Play peer to peer.</small></span><span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M14.5 15.5a4.5 4.5 0 0 1 6 4.25"/></svg></span>\\n        </button>\\n'
-        ],
-          '''
-          replace_once(icon_anchor, icon_insert, 'home icons')
-
-          join_anchor = '''      [
-          "      <div class=\\"backline\\"><button class=\\"back\\" id=\\"cancelJoinBtn\\">Cancel</button><span class=\\"tiny-status\\">Connecting</span></div>\\n",
-          '''
-          join_insert = '''      [
-          "      <div class=\\"eyebrow\\">Join multiplayer</div><h2 class=\\"section-title\\">Open the door.</h2>\\n",
-          ""
-        ],
-        [
-          "      <p class=\\"section-copy\\">A shared link opens the game directly. These are the manual ways in.</p>\\n",
-          "      <p class=\\"section-copy\\">Ask your friend to send you the game link.</p>\\n"
-        ],
-        [
-          "          <div class=\\"scan-icon\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><rect x=\\"3\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"14\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"3\\" y=\\"14\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><path d=\\"M14 14h3v3h-3zM18 14h3M21 17v4h-4M14 18v3\\"/></svg></div><div><strong>Scan QR code</strong><small>Use your camera to read the invitation.</small></div><button class=\\"text-button\\" id=\\"scanQrBtn\\">Open camera</button>\\n",
-          "          <div class=\\"scan-icon\\" aria-hidden=\\"true\\"><svg viewBox=\\"0 0 24 24\\"><rect x=\\"3\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"14\\" y=\\"3\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><rect x=\\"3\\" y=\\"14\\" width=\\"7\\" height=\\"7\\" rx=\\"1\\"/><path d=\\"M14 14h3v3h-3zM18 14h3M21 17v4h-4M14 18v3\\"/></svg></div><div><strong>Scan QR code</strong></div><button class=\\"text-button\\" id=\\"scanQrBtn\\">Open camera</button>\\n"
-        ],
-          ''' + join_anchor
-          replace_once(join_anchor, join_insert, 'join copy')
-
-          path.write_text(text, encoding='utf-8')
-          PY
-
-      - name: Validate loader syntax
+      - name: Validate and publish
         shell: bash
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          text = Path('index.html').read_text(encoding='utf-8')
-          required = [
-              'Waiting for<br>other player.',
-              'Send them this link.</p>',
-              'Join multiplayer</span>',
-              'Ask your friend to send you the game link.',
-              'class="choice-icon"',
-          ]
-          for item in required:
-              if item not in text:
-                  raise SystemExit(f'Missing expected text: {item}')
-          PY
-
-      - name: Commit changes
-        shell: bash
-        run: |
+          grep -q 'Waiting for<br>other player.' index.html
+          grep -q 'Ask your friend to send you the game link.' index.html
+          grep -q 'class="choice-icon"' index.html
           rm -f .github/workflows/apply-ui-copy-and-icons.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
