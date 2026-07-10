@@ -19,7 +19,7 @@
   <script>
   (async () => {
     try {
-      const files = Array.from({length: 8}, (_, i) => `runtime/quit-confirm-v5-${String(i + 1).padStart(2, '0')}.txt?v=9`);
+      const files = Array.from({length: 8}, (_, i) => `runtime/quit-confirm-v5-${String(i + 1).padStart(2, '0')}.txt?v=10`);
       const parts = await Promise.all(files.map(async file => {
         const response = await fetch(file, {cache: 'no-store'});
         if (!response.ok) throw new Error(`Could not load ${file}`);
@@ -34,15 +34,21 @@
       html = html.replaceAll('THREEFOLD', 'P2P TIC-TAC-TOE');
       html = html.replaceAll('Threefold', 'P2P Tic-Tac-Toe');
       html = html.replaceAll('Game link or room code', 'Game link');
-      html = html.replace(/\.scan-line\{([^}]*)border-bottom:1\.5px solid var\(--line\)([^}]*)\}/, (_, before, after) => `.scan-line{${before}${after}}`);
-      html = html.replace(/<body data-build="[^"]*"/, '<body data-build="2026-07-09-p2p-tic-tac-toe-v9"');
-      html = html.replace(
-        '</style>',
-        '.scan-line .text-button{text-decoration:none!important}.local-search,.nearby-auto-status{display:none!important}</style>'
-      );
+
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.title = 'P2P Tic-Tac-Toe';
+      doc.querySelectorAll('meta[name="apple-mobile-web-app-title"]').forEach(meta => meta.setAttribute('content', 'P2P Tic-Tac-Toe'));
+      doc.querySelectorAll('.brand span:last-child').forEach(el => { el.textContent = 'P2P TIC-TAC-TOE'; });
+      doc.querySelectorAll('.local-search,.nearby-auto-status').forEach(el => el.remove());
+      doc.querySelectorAll('.scan-line .text-button').forEach(el => { el.style.textDecoration = 'none'; });
+      doc.body?.setAttribute('data-build', '2026-07-09-p2p-tic-tac-toe-v10');
+
+      const style = doc.createElement('style');
+      style.textContent = '.local-search,.nearby-auto-status{display:none!important}.scan-line .text-button{text-decoration:none!important}.brand span:last-child::after{content:""}';
+      doc.head.appendChild(style);
 
       document.open();
-      document.write(html);
+      document.write('<!doctype html>\n' + doc.documentElement.outerHTML);
       document.close();
     } catch (error) {
       document.body.innerHTML = `<div class="error"><h1>Could not open P2P Tic-Tac-Toe</h1><p>${error.message || 'The game could not be loaded.'}</p><button type="button" onclick="location.reload()">Try again</button></div>`;
